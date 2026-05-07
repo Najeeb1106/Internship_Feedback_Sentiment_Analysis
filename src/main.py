@@ -37,7 +37,7 @@ users_db = {} # {username: hashed_password}
 feedback_history = []
 
 # --- 3. ML Model Loading ---
-MODEL_PATH = os.getenv("MODEL_PATH", os.path.join(ROOT_DIR, "models", "finetuned_distilbert"))
+MODEL_PATH = os.getenv("MODEL_PATH", "najeeb786/sentintern-ai")
 device = "cpu" # Force CPU for memory stability on Free Tier
 
 print(f"Loading ML Model from {MODEL_PATH}...")

@@ -20,3 +20,9 @@ local/
 data/*.csv
 notebooks/
 tests/
+models/
+*.pth
+*.pt
+*.bin
+*.safetensors
+.env
