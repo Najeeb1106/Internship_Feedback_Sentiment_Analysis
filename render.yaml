@@ -4,7 +4,7 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
-    plan: starter # 'free' might OOM with DistilBERT, 'starter' (512MB-1GB) is safer
+    plan: free # Optimized for 512MB RAM
     envVars:
       - key: SECRET_KEY
         generateValue: true

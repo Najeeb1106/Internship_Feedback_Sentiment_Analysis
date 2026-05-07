@@ -31,24 +31,28 @@ users_db = {} # {username: hashed_password}
 feedback_history = []
 
 # --- 3. ML Model Loading ---
-# Default to relative path from ROOT_DIR
 MODEL_PATH = os.getenv("MODEL_PATH", os.path.join(ROOT_DIR, "models", "finetuned_distilbert"))
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu" # Force CPU for memory stability on Free Tier
 
 print(f"Loading ML Model from {MODEL_PATH}...")
 try:
-    # Use standard tokenizer from hub if local files are missing
+    import gc
     tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
     if os.path.exists(MODEL_PATH):
-        model = DistilBertForSequenceClassification.from_pretrained(MODEL_PATH).to(device)
+        # Load model with minimal memory footprint
+        model = DistilBertForSequenceClassification.from_pretrained(
+            MODEL_PATH, 
+            low_cpu_mem_usage=True
+        ).to(device)
         model.eval()
-        print("✅ Model loaded successfully!")
+        # Clear any temporary memory used during loading
+        gc.collect() 
+        print("✅ Model loaded successfully on Free Tier!")
     else:
-        print(f"⚠️ Model path {MODEL_PATH} not found. Running in fallback mode.")
+        print(f"⚠️ Model path {MODEL_PATH} not found. Fallback mode.")
         model = None
 except Exception as e:
     print(f"❌ Error loading model: {e}")
-    # Fallback/Placeholder for development
     model = None
 
 # --- 4. Helper Functions ---
