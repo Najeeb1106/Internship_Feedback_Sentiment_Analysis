@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sentintern AI{% endblock %}
+
+{% block content %}
+<style>
+    .sentiment-positive { color: #22d3ee; }
+    .sentiment-negative { color: #f43f5e; }
+    .badge-positive { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+    .badge-negative { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+</style>
+<div class="container" style="padding-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem;">
+        <div>
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Analytics Dashboard</h1>
+            <p style="color: var(--text-dim);">Real-time sentiment analysis and feedback insights.</p>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <div class="glass-card" style="padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e;"></div>
+                <span style="font-size: 0.9rem; font-weight: 600;">Model Online</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+        <!-- Sentiment Distribution -->
+        <div class="glass-card fade-in" style="animation-delay: 0.1s;">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="pie-chart" style="color: var(--secondary);"></i> Sentiment Overview
+            </h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Confidence Trend -->
+        <div class="glass-card fade-in" style="animation-delay: 0.2s;">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="line-chart" style="color: var(--primary);"></i> Confidence Trend
+            </h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="confidenceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+        <!-- Analysis Input -->
+        <div class="glass-card fade-in">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="message-square-plus" style="color: var(--primary);"></i> New Analysis
+            </h3>
+            <form action="/analyze" method="post">
+                <div class="form-group">
+                    <label for="feedback">Intern Feedback Text</label>
+                    <textarea id="feedback" name="feedback" rows="6" placeholder="Paste the feedback here... (e.g., 'The program was well-structured and the mentors were helpful.')" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 1.1rem;">
+                    Analyze Sentiment <i data-lucide="sparkles"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Latest Result -->
+        <div class="glass-card fade-in" style="animation-delay: 0.3s; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            {% if result %}
+                <h3 style="margin-bottom: 2rem;">Latest Prediction</h3>
+                <div style="position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 4px solid var(--glass-border); background: rgba(255,255,255,0.02);">
+                    <div style="text-align: center;">
+                        <span style="display: block; font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">Sentiment</span>
+                        <span class="sentiment-{% if result %}{{ result.sentiment }}{% endif %}" style="display: block; font-size: 2rem; font-weight: 800;">
+                            {{ result.sentiment | upper }}
+                        </span>
+                        <span style="display: block; font-size: 1.2rem; font-weight: 600; margin-top: 0.5rem;">{{ result.confidence }}</span>
+                    </div>
+                </div>
+                <p style="margin-top: 2rem; font-style: italic; color: var(--text-dim); font-size: 0.9rem; max-width: 80%;">
+                    "{{ result.text[:100] }}{% if result.text|length > 100 %}...{% endif %}"
+                </p>
+            {% else %}
+                <i data-lucide="trending-up" style="width: 64px; height: 64px; color: var(--glass-border); margin-bottom: 1.5rem;"></i>
+                <p style="color: var(--text-dim);">Submit feedback to see real-time AI classification.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="glass-card fade-in" style="animation-delay: 0.4s;">
+        <h3 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="history" style="color: var(--secondary);"></i> Feedback History
+        </h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <th style="padding: 1rem; color: var(--text-dim);">Timestamp</th>
+                        <th style="padding: 1rem; color: var(--text-dim);">Feedback</th>
+                        <th style="padding: 1rem; color: var(--text-dim);">Sentiment</th>
+                        <th style="padding: 1rem; color: var(--text-dim);">Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr style="border-bottom: 1px solid var(--glass-border); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 1.25rem; font-size: 0.85rem; color: var(--text-dim); white-space: nowrap;">{{ item.timestamp }}</td>
+                        <td style="padding: 1.25rem; font-size: 0.95rem;">{{ item.text }}</td>
+                        <td style="padding: 1.25rem;">
+                            <span class="badge-{{ item.sentiment }}" style="padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                                {{ item.sentiment | upper }}
+                            </span>
+                        </td>
+                        <td style="padding: 1.25rem; font-weight: 600;">{{ item.confidence }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not history %}
+                    <tr>
+                        <td colspan="4" style="padding: 3rem; text-align: center; color: var(--text-dim);">No history available.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Data for JS -->
+<div id="history-data" data-history='{{ history | tojson | safe }}' style="display: none;"></div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Prepare data from history
+    const dataElement = document.getElementById('history-data');
+    const historyData = JSON.parse(dataElement.dataset.history || '[]');
+    
+    const posCount = historyData.filter(h => h.sentiment === 'positive').length;
+    const negCount = historyData.filter(h => h.sentiment === 'negative').length;
+
+    // Sentiment Distribution Chart
+    const ctxSentiment = document.getElementById('sentimentChart').getContext('2d');
+    new Chart(ctxSentiment, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive', 'Negative'],
+            datasets: [{
+                data: [posCount, negCount],
+                backgroundColor: ['#22d3ee', '#f43f5e'],
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // Confidence Trend Chart
+    const confidenceData = historyData.slice().reverse().map(h => parseFloat(h.confidence));
+    const confidenceLabels = historyData.slice().reverse().map(h => h.timestamp.split(' ')[1]);
+
+    const ctxConfidence = document.getElementById('confidenceChart').getContext('2d');
+    new Chart(ctxConfidence, {
+        type: 'line',
+        data: {
+            labels: confidenceLabels,
+            datasets: [{
+                label: 'Confidence Level (%)',
+                data: confidenceData,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#6366f1',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8' }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

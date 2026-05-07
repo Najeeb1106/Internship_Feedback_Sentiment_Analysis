@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works - Sentintern AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 4rem;">
+    <div class="fade-in" style="text-align: center; max-width: 800px; margin: 0 auto;">
+        <h1 style="font-size: 3rem; margin-bottom: 1.5rem;">How it Works</h1>
+        <p style="font-size: 1.2rem; color: var(--text-dim); margin-bottom: 4rem;">From raw feedback to deep understanding in three simple steps.</p>
+        
+        <div style="position: relative; display: flex; flex-direction: column; gap: 4rem;">
+            <!-- Step 1 -->
+            <div style="display: flex; gap: 3rem; align-items: flex-start; text-align: left;">
+                <div style="flex-shrink: 0; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; border: 4px solid var(--glass-border);">1</div>
+                <div>
+                    <h3 style="margin-bottom: 1rem;">Data Ingestion</h3>
+                    <p style="color: var(--text-dim);">Upload your program feedback CSV or paste individual comments into our dashboard. We support bulk processing for thousands of entries at once.</p>
+                </div>
+            </div>
+            
+            <!-- Connector Line -->
+            <div style="position: absolute; left: 30px; top: 60px; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--accent)); z-index: -1;"></div>
+
+            <!-- Step 2 -->
+            <div style="display: flex; gap: 3rem; align-items: flex-start; text-align: left;">
+                <div style="flex-shrink: 0; width: 60px; height: 60px; background: var(--secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; border: 4px solid var(--glass-border);">2</div>
+                <div>
+                    <h3 style="margin-bottom: 1rem;">AI Neural Processing</h3>
+                    <p style="color: var(--text-dim);">The text is tokenized and passed through our fine-tuned DistilBERT transformer. The model analyzes the context, semantics, and sentiment of every word to determine the overall tone.</p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div style="display: flex; gap: 3rem; align-items: flex-start; text-align: left;">
+                <div style="flex-shrink: 0; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; border: 4px solid var(--glass-border);">3</div>
+                <div>
+                    <h3 style="margin-bottom: 1rem;">Insight Generation</h3>
+                    <p style="color: var(--text-dim);">Results are presented in a comprehensive dashboard with sentiment trends, confidence intervals, and historical tracking to help you monitor program health over time.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 6rem; padding: 3rem;">
+            <h2 style="margin-bottom: 1.5rem;">Ready to see it in action?</h2>
+            <p style="color: var(--text-dim); margin-bottom: 2rem;">Join hundreds of coordinators who are making data-driven decisions about their feedback data.</p>
+            <a href="/signup" class="btn btn-primary" style="padding: 1rem 3rem;">Get Started for Free</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

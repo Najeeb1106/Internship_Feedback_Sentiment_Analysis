@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}About - Sentintern AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 4rem;">
+    <div class="fade-in">
+        <h1 style="font-size: 3rem; margin-bottom: 2rem; text-align: center;">Mission & Technology</h1>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; margin-bottom: 6rem;">
+            <div>
+                <p style="font-size: 1.2rem; color: var(--text-dim); margin-bottom: 1.5rem;">
+                    Sentintern AI was built to bridge the gap between raw feedback and actionable data. Our platform transforms qualitative text into quantitative insights.
+                </p>
+                <p style="color: var(--text-dim); margin-bottom: 1.5rem;">
+                    We leverage state-of-the-art Natural Language Processing to help organizations understand the pulse of their programs, ensuring every voice is heard and every sentiment is accounted for.
+                </p>
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Our Vision</h4>
+                    <p style="font-size: 0.9rem;">To become the global leader in feedback intelligence, providing clear and objective sentiment analysis for businesses and educational institutions alike.</p>
+                </div>
+            </div>
+            <div class="glass-card">
+                <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="microchip"></i> The Tech Stack
+                </h3>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+                    <li style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span>
+                        <div>
+                            <strong>FastAPI Backend</strong>
+                            <p style="font-size: 0.8rem; color: var(--text-dim);">High-performance Python web framework.</p>
+                        </div>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--secondary);"></span>
+                        <div>
+                            <strong>Fine-tuned DistilBERT</strong>
+                            <p style="font-size: 0.8rem; color: var(--text-dim);">A distilled version of BERT, optimized for speed and accuracy.</p>
+                        </div>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent);"></span>
+                        <div>
+                            <strong>PyTorch Engine</strong>
+                            <p style="font-size: 0.8rem; color: var(--text-dim);">Powering complex tensor computations for ML inference.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        </div>
+    </div>
+</div>
+{% endblock %}

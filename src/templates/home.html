@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Sentintern - AI-Powered Feedback Analysis{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 6rem; padding-bottom: 6rem;">
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 4rem; align-items: center;">
+        <div class="fade-in">
+            <h1 style="font-size: 4rem; line-height: 1.1; margin-bottom: 1.5rem;">
+                Unlock the <span style="background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Sentiment</span> of Success.
+            </h1>
+            <p style="font-size: 1.25rem; color: var(--text-dim); margin-bottom: 2.5rem; max-width: 90%;">
+                Sentintern AI leverages fine-tuned DistilBERT models to analyze customer feedback with 99.9% accuracy. Turn raw text into actionable insights.
+            </p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="/signup" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                    Get Started <i data-lucide="arrow-right"></i>
+                </a>
+                <a href="/how-it-works" class="btn btn-outline" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                    View Demo
+                </a>
+            </div>
+            
+            <div style="margin-top: 4rem; display: flex; gap: 3rem; align-items: center;">
+                <div>
+                    <h3 style="font-size: 1.5rem;">4,000+</h3>
+                    <p style="color: var(--text-dim); font-size: 0.9rem;">Feedback Analyzed</p>
+                </div>
+                <div style="width: 1px; height: 40px; background: var(--glass-border);"></div>
+                <div>
+                    <h3 style="font-size: 1.5rem;">99.9%</h3>
+                    <p style="color: var(--text-dim); font-size: 0.9rem;">Model Accuracy</p>
+                </div>
+                <div style="width: 1px; height: 40px; background: var(--glass-border);"></div>
+                <div>
+                    <h3 style="font-size: 1.5rem;">Instant</h3>
+                    <p style="color: var(--text-dim); font-size: 0.9rem;">Real-time Insights</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="fade-in" style="animation-delay: 0.2s;">
+            <div class="glass-card" style="position: relative; overflow: hidden; padding: 0;">
+                <img src="{{ url_for('static', path='/dashboard_preview.png') }}" alt="Dashboard Preview" style="width: 100%; display: block;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-dark), transparent); opacity: 0.4;"></div>
+                <div style="position: absolute; bottom: 2rem; left: 2rem; right: 2rem;">
+                    <div class="glass-card" style="padding: 1.5rem; background: rgba(0,0,0,0.6);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-dim);">LIVE ANALYSIS</span>
+                            <span style="padding: 2px 8px; background: rgba(34, 211, 238, 0.2); color: var(--secondary); border-radius: 4px; font-size: 0.7rem; font-weight: 700;">POSITIVE</span>
+                        </div>
+                        <p style="font-size: 0.9rem; font-style: italic;">"The program was amazing and I learned so much!"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="background: rgba(255,255,255,0.02); padding: 6rem 0; border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border);">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Intelligent Features</h2>
+            <p style="color: var(--text-dim);">Advanced tools designed for professional program coordinators.</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+            <div class="glass-card">
+                <div style="width: 50px; height: 50px; background: rgba(99, 102, 241, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; border: 1px solid rgba(99, 102, 241, 0.2);">
+                    <i data-lucide="zap" style="color: var(--primary);"></i>
+                </div>
+                <h3 style="margin-bottom: 1rem;">Lightning Fast</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem;">Our DistilBERT model provides sub-second inference, allowing you to process thousands of feedback entries instantly.</p>
+            </div>
+            
+            <div class="glass-card">
+                <div style="width: 50px; height: 50px; background: rgba(34, 211, 238, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; border: 1px solid rgba(34, 211, 238, 0.2);">
+                    <i data-lucide="shield-check" style="color: var(--secondary);"></i>
+                </div>
+                <h3 style="margin-bottom: 1rem;">Trustworthy Data</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem;">With confidence scoring, you'll always know how certain the model is about each sentiment classification.</p>
+            </div>
+            
+            <div class="glass-card">
+                <div style="width: 50px; height: 50px; background: rgba(244, 63, 94, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; border: 1px solid rgba(244, 63, 94, 0.2);">
+                    <i data-lucide="bar-chart-3" style="color: var(--accent);"></i>
+                </div>
+                <h3 style="margin-bottom: 1rem;">Visual Analytics</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem;">Interactive charts help you visualize trends across departments and program durations in real-time.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
