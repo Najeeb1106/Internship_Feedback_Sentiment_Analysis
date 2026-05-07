@@ -12,6 +12,7 @@ datasets
 tqdm
 fastapi
 uvicorn[standard]
+gunicorn
 jinja2
 python-multipart
 python-jose[cryptography]
