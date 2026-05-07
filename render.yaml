@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: sentintern-ai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    plan: starter # 'free' might OOM with DistilBERT, 'starter' (512MB-1GB) is safer
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: MODEL_PATH
+        value: ./models/finetuned_distilbert
+      - key: PYTHON_VERSION
+        value: 3.10.12

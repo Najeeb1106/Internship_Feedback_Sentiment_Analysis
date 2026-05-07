@@ -11,9 +11,9 @@ from transformers import DistilBertTokenizerFast, DistilBertForSequenceClassific
 import os
 
 # --- 1. Configuration & Security ---
-SECRET_KEY = "your-secret-key-change-this"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
@@ -26,20 +26,26 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), na
 
 # --- 2. Database (Simulated for Demo) ---
 # In a real app, use SQLAlchemy with SQLite/Postgres
+# WARNING: In-memory storage will reset on Render Free Tier restarts
 users_db = {} # {username: hashed_password}
 feedback_history = []
 
 # --- 3. ML Model Loading ---
-MODEL_PATH = os.path.join(ROOT_DIR, "models", "finetuned_distilbert")
+# Default to relative path from ROOT_DIR
+MODEL_PATH = os.getenv("MODEL_PATH", os.path.join(ROOT_DIR, "models", "finetuned_distilbert"))
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 print(f"Loading ML Model from {MODEL_PATH}...")
 try:
     # Use standard tokenizer from hub if local files are missing
     tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
-    model = DistilBertForSequenceClassification.from_pretrained(MODEL_PATH).to(device)
-    model.eval()
-    print("✅ Model loaded successfully!")
+    if os.path.exists(MODEL_PATH):
+        model = DistilBertForSequenceClassification.from_pretrained(MODEL_PATH).to(device)
+        model.eval()
+        print("✅ Model loaded successfully!")
+    else:
+        print(f"⚠️ Model path {MODEL_PATH} not found. Running in fallback mode.")
+        model = None
 except Exception as e:
     print(f"❌ Error loading model: {e}")
     # Fallback/Placeholder for development

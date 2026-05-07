@@ -23,9 +23,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
-# Expose the port the app runs on
+# Expose the port (Render will override this, but it's good practice)
 EXPOSE 8000
 
 # Command to run the application
-# Note: We use 0.0.0.0 to make it accessible outside the container
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# We use the PORT environment variable if provided by the host (like Render)
+CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
