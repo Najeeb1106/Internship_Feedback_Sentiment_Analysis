@@ -79,6 +79,8 @@ models/finetuned_distilbert/training_args.bin
 *.pth
 *.h5
 *.joblib
+*.safetensors
+
 
 
 # OS files
