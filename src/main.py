@@ -22,6 +22,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 app = FastAPI(title="Sentintern - AI Feedback Intelligence")
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    print(f"GLOBAL ERROR: {exc}")
+    return HTMLResponse(content=f"Internal Server Error: {exc}", status_code=500)
+
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 # --- 2. Database (Simulated for Demo) ---
@@ -83,11 +89,11 @@ def predict_sentiment(text):
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse(request, "home.html")
+    return templates.TemplateResponse("home.html", {"request": request})
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse(request, "login.html")
+    return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
@@ -102,7 +108,7 @@ async def login(username: str = Form(...), password: str = Form(...)):
 
 @app.get("/signup", response_class=HTMLResponse)
 async def signup_page(request: Request):
-    return templates.TemplateResponse(request, "signup.html")
+    return templates.TemplateResponse("signup.html", {"request": request})
 
 @app.post("/signup")
 async def signup(username: str = Form(...), password: str = Form(...)):
@@ -113,16 +119,15 @@ async def signup(username: str = Form(...), password: str = Form(...)):
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    # In real app, verify JWT cookie here
-    return templates.TemplateResponse(request, "dashboard.html", {"history": feedback_history})
+    return templates.TemplateResponse("dashboard.html", {"request": request, "history": feedback_history})
 
 @app.get("/about", response_class=HTMLResponse)
 async def about(request: Request):
-    return templates.TemplateResponse(request, "about.html")
+    return templates.TemplateResponse("about.html", {"request": request})
 
 @app.get("/how-it-works", response_class=HTMLResponse)
 async def how_it_works(request: Request):
-    return templates.TemplateResponse(request, "how_it_works.html")
+    return templates.TemplateResponse("how_it_works.html", {"request": request})
 
 @app.post("/analyze")
 async def analyze(request: Request, feedback: str = Form(...)):
@@ -134,7 +139,8 @@ async def analyze(request: Request, feedback: str = Form(...)):
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
     }
     feedback_history.insert(0, result)
-    return templates.TemplateResponse(request, "dashboard.html", {
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request,
         "result": result, 
         "history": feedback_history
     })
