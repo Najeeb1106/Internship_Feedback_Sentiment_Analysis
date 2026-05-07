@@ -27,6 +27,9 @@ The backend is built for speed and modularity:
 - **Environment**: All sensitive configurations are managed via `.env` files.
 
 ## 6. Training Process
+> [!NOTE]
+> The model weights generated from this process (approx. 260MB) are ignored by Git. When deploying or running locally, ensure the `.safetensors` or `.bin` files are manually placed in the `models/` directory.
+
 The model was trained using the following parameters:
 - **Epochs**: 3
 - **Batch Size**: 16

@@ -56,7 +56,10 @@ cp .env.example .env
 ```
 
 ### 3. Initialize Model
-Ensure your fine-tuned model files (`pytorch_model.bin`, `config.json`) are located in:
+> [!IMPORTANT]
+> **Large File Note**: The fine-tuned model weights (`model.safetensors` / `pytorch_model.bin`) are excluded from this repository due to GitHub's 100MB file size limit. 
+
+Ensure your fine-tuned model files are located in:
 `models/finetuned_distilbert/`
 
 ### 4. Run Development Server
