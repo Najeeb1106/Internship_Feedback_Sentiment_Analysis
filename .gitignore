@@ -71,16 +71,6 @@ ENV/
 # mypy
 .mypy_cache/
 
-# Model weights (large files)
-models/finetuned_distilbert/pytorch_model.bin
-models/finetuned_distilbert/training_args.bin
-*.bin
-*.pt
-*.pth
-*.h5
-*.joblib
-*.safetensors
-
 
 
 # OS files
