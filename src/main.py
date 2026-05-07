@@ -89,11 +89,11 @@ def predict_sentiment(text):
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request})
+    return templates.TemplateResponse(request, "home.html")
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html")
 
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
@@ -108,7 +108,7 @@ async def login(username: str = Form(...), password: str = Form(...)):
 
 @app.get("/signup", response_class=HTMLResponse)
 async def signup_page(request: Request):
-    return templates.TemplateResponse("signup.html", {"request": request})
+    return templates.TemplateResponse(request, "signup.html")
 
 @app.post("/signup")
 async def signup(username: str = Form(...), password: str = Form(...)):
@@ -119,15 +119,15 @@ async def signup(username: str = Form(...), password: str = Form(...)):
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request, "history": feedback_history})
+    return templates.TemplateResponse(request, "dashboard.html", {"history": feedback_history})
 
 @app.get("/about", response_class=HTMLResponse)
 async def about(request: Request):
-    return templates.TemplateResponse("about.html", {"request": request})
+    return templates.TemplateResponse(request, "about.html")
 
 @app.get("/how-it-works", response_class=HTMLResponse)
 async def how_it_works(request: Request):
-    return templates.TemplateResponse("how_it_works.html", {"request": request})
+    return templates.TemplateResponse(request, "how_it_works.html")
 
 @app.post("/analyze")
 async def analyze(request: Request, feedback: str = Form(...)):
@@ -139,8 +139,7 @@ async def analyze(request: Request, feedback: str = Form(...)):
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
     }
     feedback_history.insert(0, result)
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "dashboard.html", {
         "result": result, 
         "history": feedback_history
     })
