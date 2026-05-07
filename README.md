@@ -56,10 +56,11 @@ cp .env.example .env
 ```
 
 ### 3. Initialize Model
-> [!IMPORTANT]
-> **Large File Note**: The fine-tuned model weights (`model.safetensors` / `pytorch_model.bin`) are excluded from this repository due to GitHub's 100MB file size limit. 
+This project uses **Git LFS** to track large model weights. 
+1. Install Git LFS: `git lfs install`
+2. Pull model weights: `git lfs pull`
 
-Ensure your fine-tuned model files are located in:
+The fine-tuned model files will be located in:
 `models/finetuned_distilbert/`
 
 ### 4. Run Development Server
