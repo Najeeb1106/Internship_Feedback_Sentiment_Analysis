@@ -17,8 +17,8 @@
         </div>
         <div style="display: flex; gap: 1rem;">
             <div class="glass-card" style="padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1rem;">
-                <div style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e;"></div>
-                <span style="font-size: 0.9rem; font-weight: 600;">Model Online</span>
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: {% if model_online %}#22c55e{% else %}#ef4444{% endif %};"></div>
+                <span style="font-size: 0.9rem; font-weight: 600;">Model {% if model_online %}Online{% else %}Offline{% endif %}</span>
             </div>
         </div>
     </div>

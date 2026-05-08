@@ -39,27 +39,37 @@ feedback_history = []
 # --- 3. ML Model Loading ---
 MODEL_PATH = os.getenv("MODEL_PATH", "najeeb786/sentintern-ai")
 device = "cpu" # Force CPU for memory stability on Free Tier
+model_online = False
+
+# Memory Optimization for Free Tier
+torch.set_num_threads(1)
 
 print(f"Loading ML Model from {MODEL_PATH}...")
 try:
     import gc
+    gc.collect() # Pre-emptive clear
+    
     tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
-    if os.path.exists(MODEL_PATH):
-        # Load model with minimal memory footprint
-        model = DistilBertForSequenceClassification.from_pretrained(
-            MODEL_PATH, 
-            low_cpu_mem_usage=True
-        ).to(device)
-        model.eval()
-        # Clear any temporary memory used during loading
-        gc.collect() 
-        print("✅ Model loaded successfully on Free Tier!")
-    else:
-        print(f"⚠️ Model path {MODEL_PATH} not found. Fallback mode.")
-        model = None
+    
+    # Load model with minimal memory footprint - from_pretrained handles both local and HF repo IDs
+    model = DistilBertForSequenceClassification.from_pretrained(
+        MODEL_PATH, 
+        low_cpu_mem_usage=True,
+        torch_dtype=torch.float32 # Explicitly use float32 to avoid half-precision issues on CPU
+    ).to(device)
+    model.eval()
+    
+    # Clear any temporary memory used during loading
+    gc.collect() 
+    model_online = True
+    print("✅ Model loaded successfully!")
 except Exception as e:
-    print(f"❌ Error loading model: {e}")
+    import traceback
+    print(f"❌ Error loading model from {MODEL_PATH}:")
+    traceback.print_exc()
+    print("⚠️ Falling back to mock sentiment analysis.")
     model = None
+    model_online = False
 
 # --- 4. Helper Functions ---
 def get_password_hash(password):
@@ -119,7 +129,10 @@ async def signup(username: str = Form(...), password: str = Form(...)):
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    return templates.TemplateResponse(request, "dashboard.html", {"history": feedback_history})
+    return templates.TemplateResponse(request, "dashboard.html", {
+        "history": feedback_history,
+        "model_online": model_online
+    })
 
 @app.get("/about", response_class=HTMLResponse)
 async def about(request: Request):
@@ -141,7 +154,8 @@ async def analyze(request: Request, feedback: str = Form(...)):
     feedback_history.insert(0, result)
     return templates.TemplateResponse(request, "dashboard.html", {
         "result": result, 
-        "history": feedback_history
+        "history": feedback_history,
+        "model_online": model_online
     })
 
 @app.get("/logout")

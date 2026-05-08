@@ -40,7 +40,7 @@ Sentintern_AI/
 └── requirements.txt    # Dependency Manifest
 ```
 
-## 🚀 Local Setup
+## 🚀 Local Setup & Deployment
 
 ### 1. Clone & Install
 ```bash
@@ -50,25 +50,32 @@ pip install -r requirements.txt
 ```
 
 ### 2. Configure Environment
+Create a `.env` file from the example:
 ```bash
 cp .env.example .env
-# Edit .env with your SECRET_KEY
 ```
+Key variables:
+- `MODEL_PATH`: Set to `najeeb786/sentintern-ai` (Hugging Face) or a local path.
+- `SECRET_KEY`: A random string for JWT security.
 
-### 3. Initialize Model
-This project uses **Git LFS** to track large model weights. 
-1. Install Git LFS: `git lfs install`
-2. Pull model weights: `git lfs pull`
-
-The fine-tuned model files will be located in:
-`models/finetuned_distilbert/`
-
-### 4. Run Development Server
+### 3. Run Development Server
 ```bash
-cd src
-uvicorn main:app --reload
+uvicorn src.main:app --reload
 ```
-Visit [http://localhost:8000](http://localhost:8000)
+Visit [http://localhost:8000](http://localhost:8000). The app will automatically download the model from Hugging Face on the first run.
+
+## ☁️ Deployment (Render)
+
+This project is optimized for deployment on **Render** (Free Tier):
+1. Create a new **Web Service** on Render.
+2. Connect this repository.
+3. Use the following settings:
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn -w 1 -k uvicorn.workers.UvicornWorker src.main:app --bind 0.0.0.0:$PORT`
+4. Set **Environment Variables**:
+   - `MODEL_PATH`: `najeeb786/sentintern-ai`
+   - `SECRET_KEY`: (Your secret string)
 
 ## 📐 Architecture
 
