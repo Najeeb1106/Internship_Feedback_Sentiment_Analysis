@@ -6,8 +6,6 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-import torch
-from transformers import DistilBertTokenizerFast, DistilBertForSequenceClassification
 import os
 
 # --- 1. Configuration & Security ---
@@ -36,40 +34,18 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), na
 users_db = {} # {username: hashed_password}
 feedback_history = []
 
-# --- 3. ML Model Loading ---
-MODEL_PATH = os.getenv("MODEL_PATH", "najeeb786/sentintern-ai")
-device = "cpu" # Force CPU for memory stability on Free Tier
-model_online = False
+# --- 3. ML Model Loading (Using HF Inference API) ---
+HF_API_URL = f"https://api-inference.huggingface.co/models/{MODEL_PATH}"
+HF_TOKEN = os.getenv("HF_TOKEN", "") # Add this to Render Env Vars
+model_online = True # We assume API is up; we'll check on first call
 
-# Memory Optimization for Free Tier
-torch.set_num_threads(1)
+def query_hf_api(payload):
+    import requests
+    headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
+    response = requests.post(HF_API_URL, headers=headers, json=payload)
+    return response.json()
 
-print(f"Loading ML Model from {MODEL_PATH}...")
-try:
-    import gc
-    gc.collect() # Pre-emptive clear
-    
-    tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
-    
-    # Load model with minimal memory footprint - from_pretrained handles both local and HF repo IDs
-    model = DistilBertForSequenceClassification.from_pretrained(
-        MODEL_PATH, 
-        low_cpu_mem_usage=True,
-        torch_dtype=torch.float32 # Explicitly use float32 to avoid half-precision issues on CPU
-    ).to(device)
-    model.eval()
-    
-    # Clear any temporary memory used during loading
-    gc.collect() 
-    model_online = True
-    print("✅ Model loaded successfully!")
-except Exception as e:
-    import traceback
-    print(f"❌ Error loading model from {MODEL_PATH}:")
-    traceback.print_exc()
-    print("⚠️ Falling back to mock sentiment analysis.")
-    model = None
-    model_online = False
+print(f"Connected to HF Inference API for {MODEL_PATH}")
 
 # --- 4. Helper Functions ---
 def get_password_hash(password):
@@ -85,15 +61,33 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def predict_sentiment(text):
-    if not model: return "Error", 0.0
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=128).to(device)
-    with torch.no_grad():
-        outputs = model(**inputs)
-        probs = torch.nn.functional.softmax(outputs.logits, dim=1)
-        conf, pred = torch.max(probs, dim=1)
+    global model_online
+    try:
+        output = query_hf_api({"inputs": text})
+        
+        # API might return error if model is still loading
+        if isinstance(output, dict) and "error" in output:
+            print(f"HF API Error: {output['error']}")
+            return "Loading...", 0.0
+            
+        # Extract label and score (HF format is usually [[{'label': 'LABEL_0', 'score': 0.9}, ...]])
+        if isinstance(output, list) and len(output) > 0:
+            results = output[0]
+            # Find the result with highest score
+            best = max(results, key=lambda x: x['score'])
+            
+            # Map your model's labels if necessary (adjust 'LABEL_1' to 'positive' etc.)
+            label = best['label'].lower()
+            if label == "label_1": label = "positive"
+            elif label == "label_0": label = "negative"
+            
+            return label, float(best['score'])
+            
+    except Exception as e:
+        print(f"Prediction Error: {e}")
+        model_online = False
     
-    label = "positive" if pred.item() == 1 else "negative"
-    return label, float(conf.item())
+    return "Error", 0.0
 
 # --- 5. Routes ---
 

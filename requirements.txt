@@ -1,15 +1,4 @@
-pandas
-numpy
-matplotlib
-seaborn
-scikit-learn
-# Core ML (Using CPU-only versions for Render Free tier to save space/memory)
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
-transformers
-accelerate
-datasets
-tqdm
+# Core Requirements
 fastapi
 uvicorn[standard]
 gunicorn
@@ -17,4 +6,6 @@ jinja2
 python-multipart
 python-jose[cryptography]
 passlib[bcrypt]
+requests
+python-dotenv
 huggingface_hub
