@@ -8,6 +8,9 @@
     .sentiment-negative { color: #f43f5e; }
     .badge-positive { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
     .badge-negative { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+    .status-indicator { width: 10px; height: 10px; border-radius: 50%; }
+    .status-online { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+    .status-offline { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
 </style>
 <div class="container" style="padding-top: 2rem;">
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem;">
@@ -17,7 +20,7 @@
         </div>
         <div style="display: flex; gap: 1rem;">
             <div class="glass-card" style="padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1rem;">
-                <div style="width: 10px; height: 10px; border-radius: 50%; background: {% if model_online %}#22c55e{% else %}#ef4444{% endif %};"></div>
+                <div class="status-indicator {% if model_online %}status-online{% else %}status-offline{% endif %}"></div>
                 <span style="font-size: 0.9rem; font-weight: 600;">Model {% if model_online %}Online{% else %}Offline{% endif %}</span>
             </div>
         </div>
