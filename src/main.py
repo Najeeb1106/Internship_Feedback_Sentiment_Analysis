@@ -26,15 +26,27 @@ async def lifespan(app: FastAPI):
     # Check model status on startup
     global model_online
     try:
-        # Move import here or keep at top
-        import requests
-        test_res = query_hf_api({"inputs": "Startup test"})
-        if isinstance(test_res, dict) and "error" in test_res:
-            print(f"Startup Model Warning: {test_res['error']}")
-            model_online = "loading" in test_res.get("error", "").lower()
-        else:
+        # Use client to check status
+        print(f"Verifying model {MODEL_PATH} status...")
+        # A simple call to check if it's there
+        # We don't use the result, just check if it raises an error
+        try:
+            client.text_classification("Startup test")
             print("Successfully connected to Hugging Face Inference API!")
             model_online = True
+        except Exception as e:
+            err_msg = str(e).lower()
+            if "loading" in err_msg or "503" in err_msg:
+                print("Model is currently loading on Hugging Face. It will be ready soon.")
+                model_online = True # It's online, just warming up
+            else:
+                print(f"Startup Model Warning: {e}")
+                # Check if we have a local model as fallback
+                if os.path.exists(os.path.join(ROOT_DIR, "models", "finetuned_distilbert")):
+                    print("Found local model. Using local fallback for development.")
+                    model_online = True
+                else:
+                    model_online = False
     except Exception as e:
         print(f"Startup Connection Failed: {e}")
         model_online = False
@@ -56,14 +68,21 @@ users_db = {} # {username: hashed_password}
 feedback_history = []
 
 # --- 3. ML Model Loading (Using HF Inference API) ---
+from huggingface_hub import InferenceClient
+
+HF_TOKEN = os.getenv("HF_TOKEN", "")
+client = InferenceClient(model=MODEL_PATH, token=HF_TOKEN)
 HF_API_URL = f"https://api-inference.huggingface.co/models/{MODEL_PATH}"
-HF_TOKEN = os.getenv("HF_TOKEN", "") # Add this to Render Env Vars
-model_online = True # We assume API is up; we'll check on first call
+model_online = True # We'll verify during lifespan
 
 def query_hf_api(payload):
+    # This is kept for backward compatibility if needed, 
+    # but we'll use client directly in predict_sentiment
     import requests
     headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
     response = requests.post(HF_API_URL, headers=headers, json=payload)
+    if response.status_code != 200:
+        return {"error": f"Status {response.status_code}: {response.text}"}
     return response.json()
 
 print(f"Connected to HF Inference API for {MODEL_PATH}")
@@ -84,25 +103,38 @@ def create_access_token(data: dict):
 def predict_sentiment(text):
     global model_online
     try:
-        output = query_hf_api({"inputs": text})
-        
-        # API might return error if model is still loading
-        if isinstance(output, dict) and "error" in output:
-            print(f"HF API Error: {output['error']}")
-            return "Loading...", 0.0
+        # 1. Try HF Inference API first
+        try:
+            results = client.text_classification(text)
+            if results:
+                # Find the result with highest score
+                best = max(results, key=lambda x: x['score'])
+                
+                label = best['label'].lower()
+                # Map labels if they are LABEL_0/LABEL_1
+                if label == "label_1": label = "positive"
+                elif label == "label_0": label = "negative"
+                
+                return label, float(best['score'])
+        except Exception as hf_err:
+            err_msg = str(hf_err).lower()
+            if "loading" in err_msg or "503" in err_msg:
+                print("HF API: Model is still loading...")
+                return "Loading...", 0.0
+            print(f"HF API Error: {hf_err}")
             
-        # Extract label and score (HF format is usually [[{'label': 'LABEL_0', 'score': 0.9}, ...]])
-        if isinstance(output, list) and len(output) > 0:
-            results = output[0]
-            # Find the result with highest score
-            best = max(results, key=lambda x: x['score'])
-            
-            # Map your model's labels if necessary (adjust 'LABEL_1' to 'positive' etc.)
-            label = best['label'].lower()
+        # 2. Fallback to Local Model if API fails and we are local
+        local_path = os.path.join(ROOT_DIR, "models", "finetuned_distilbert")
+        if os.path.exists(local_path):
+            print("Using local model fallback...")
+            # We don't want to load transformers here every time, but for a quick fix:
+            from transformers import pipeline
+            local_pipe = pipeline("text-classification", model=local_path, tokenizer=local_path)
+            res = local_pipe(text)[0]
+            label = res['label'].lower()
             if label == "label_1": label = "positive"
             elif label == "label_0": label = "negative"
-            
-            return label, float(best['score'])
+            return label, float(res['score'])
             
     except Exception as e:
         print(f"Prediction Error: {e}")
