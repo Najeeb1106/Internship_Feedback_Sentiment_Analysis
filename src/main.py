@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, Form, Depends, HTTPException, status
+from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -20,7 +21,26 @@ ROOT_DIR = os.path.dirname(BASE_DIR)
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-app = FastAPI(title="Sentintern - AI Feedback Intelligence")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Check model status on startup
+    global model_online
+    try:
+        # Move import here or keep at top
+        import requests
+        test_res = query_hf_api({"inputs": "Startup test"})
+        if isinstance(test_res, dict) and "error" in test_res:
+            print(f"Startup Model Warning: {test_res['error']}")
+            model_online = "loading" in test_res.get("error", "").lower()
+        else:
+            print("Successfully connected to Hugging Face Inference API!")
+            model_online = True
+    except Exception as e:
+        print(f"Startup Connection Failed: {e}")
+        model_online = False
+    yield
+
+app = FastAPI(title="Sentintern - AI Feedback Intelligence", lifespan=lifespan)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
